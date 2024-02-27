@@ -1,4 +1,4 @@
-export { initialCards, createCard, deleteCard };
+export { initialCards, createCard, deleteCard, likeCard };
 import { cardTemplate } from "../scripts/index.js";
 
 const initialCards = [
@@ -32,20 +32,27 @@ function deleteCard(element) {
   element.remove();
 }
 
-function createCard(cardData, deleteCard, showPopupTypeImage) {
+function likeCard(button) {
+  button.classList.toggle("card__like-button_is-active");
+}
+
+function createCard(cardData, deleteCard, showPopupTypeImage, likeCard) {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const deleteButton = cardElement.querySelector(".card__delete-button");
   const cardImage = cardElement.querySelector(".card__image");
+  const likeButton = cardElement.querySelector(".card__like-button");
 
   cardElement.querySelector(".card__image").src = cardData.link;
   cardElement.querySelector(".card__image").alt = cardData.name;
   cardElement.querySelector(".card__title").textContent = cardData.name;
-
   // по жматию на кнопку удаления, вызываем функцию удаления карточки
   deleteButton.addEventListener("click", () => {
     deleteCard(cardElement);
   });
-
+  // обработчик лайка
+  likeButton.addEventListener("click", () => {
+    likeCard(likeButton);
+  });
   // открываем и заполняем попап при жматии на картинку
   cardImage.addEventListener("click", () => {
     showPopupTypeImage(cardData);
