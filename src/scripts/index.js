@@ -4,7 +4,6 @@ import { createCard, deleteCard, likeCard } from "../scripts/card.js";
 import {
   showPopup,
   closePopup,
-  popups,
   closePopupWithMouse,
 } from "../scripts/modal.js";
 
@@ -15,6 +14,7 @@ const buttonOpenFormEditProfile = document.querySelector(
 );
 const addNewCardButton = document.querySelector(".profile__add-button");
 
+const popups = document.querySelectorAll(".popup");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
@@ -84,20 +84,18 @@ popupCloseButtons.forEach((button) => {
 });
 
 // редактирование данных профиля
-function handleFormSubmit(evt) {
+function submitEditProfileForm(evt) {
   evt.preventDefault();
-  const openedPopup = document.querySelector(".popup_is-opened");
   profileTitle.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
-  closePopup(openedPopup);
+  closePopup(popupTypeEdit);
 }
 
-formEditProfile.addEventListener("submit", handleFormSubmit);
+formEditProfile.addEventListener("submit", submitEditProfileForm);
 
 // добавление новой карточки пользователем
 function addNewCard(evt) {
   evt.preventDefault();
-  const openedPopup = document.querySelector(".popup_is-opened");
   const cardData = {
     name: cardName.value,
     link: cardUrl.value,
@@ -106,7 +104,7 @@ function addNewCard(evt) {
     createCard(cardData, deleteCard, showPopupTypeImage, likeCard)
   );
   forms.newPlace.reset();
-  closePopup(openedPopup);
+  closePopup(popupTypeCard);
 }
 
 popupTypeCard.addEventListener("submit", addNewCard);

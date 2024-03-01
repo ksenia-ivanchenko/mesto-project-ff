@@ -1,11 +1,4 @@
-export {
-  showPopup,
-  closePopup,
-  popups,
-  closePopupWithMouse,
-};
-
-const popups = document.querySelectorAll(".popup");
+export { showPopup, closePopup, closePopupWithMouse };
 
 // функция появления модального окна
 function showPopup(popupType) {
@@ -16,18 +9,18 @@ function showPopup(popupType) {
 // закрытие кликом по оверлею
 function closePopupWithMouse(evt) {
   const openedPopup = document.querySelector(".popup_is-opened");
-  if (evt.target === openedPopup) {
+  if (evt.target === evt.currentTarget) {
     closePopup(openedPopup);
   }
 }
 
 //закрытие ескейпом
-function closePopupWithEsc (evt) {
-  const openedPopup = document.querySelector(".popup_is-opened");
+function closePopupWithEsc(evt) {
   if (evt.key === "Escape") {
+    const openedPopup = document.querySelector(".popup_is-opened");
     closePopup(openedPopup);
   }
-};
+}
 
 // функция закрытия модального окна
 function closePopup(popup) {
