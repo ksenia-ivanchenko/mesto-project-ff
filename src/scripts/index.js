@@ -22,11 +22,12 @@ const popupCloseButtons = document.querySelectorAll(".popup__close");
 const popupImage = document.querySelector(".popup__image");
 const popupCaption = document.querySelector(".popup__caption");
 
-const formEditProfile = document.querySelector(".popup__form");
+const formEditProfile = popupTypeEdit.querySelector(".popup__form");
 const nameInput = formEditProfile.querySelector(".popup__input_type_name");
 const jobInput = formEditProfile.querySelector(
   ".popup__input_type_description"
 );
+const nameError = formEditProfile.querySelector(`.${nameInput.name}-error`);
 
 const cardName = popupTypeCard.querySelector(".popup__input_type_card-name");
 const cardUrl = popupTypeCard.querySelector(".popup__input_type_url");
@@ -108,3 +109,76 @@ function addNewCard(evt) {
 }
 
 popupTypeCard.addEventListener("submit", addNewCard);
+
+// валидация форм
+// показываем текст ошибки, подсвечиваем поле, если все не ок
+const showInputError = (formElement, inputElement, errorMessage) => {
+  const errorElement = formElement.querySelector(`.${inputElement.name}-error`);
+  inputElement.classList.add("popup__input-error");
+  errorElement.textContent = errorMessage;
+  errorElement.classList.add("popup__input-type-error_active");
+};
+
+//убираем текст ошибки и подсветку поля, если все ок
+const hideInputError = (formElement, inputElement) => {
+  const errorElement = formElement.querySelector(`.${inputElement.name}-error`);
+  inputElement.classList.remove("popup__input-error");
+  errorElement.classList.remove("popup__input-type-error_active");
+  errorElement.textContent = "";
+};
+
+//проверяем правильность заполнения
+const isValid = (formElement, inputElement) => {
+  if (inputElement.validity.patternMismatch) {
+    inputElement.setCustomValidity("Поле может содержать только латинские и кириллические буквы, знаки дефиса и пробелы");
+  } else {
+    inputElement.setCustomValidity("");
+  }
+
+  if (!inputElement.validity.valid) {
+    showInputError(formElement, inputElement, inputElement.validationMessage);
+  } else {
+    hideInputError(formElement, inputElement);
+  }
+};
+
+//проверяем, есть ли невалидные инпуты, чтобы заблочить сабмит
+const hasInvalidInput = (inputList) => {
+  return inputList.some((inputElement) => {
+    return !inputElement.validity.valid;
+  });
+};
+
+//функция включающая или отключающая сабмит
+const toggleButtonState = (inputList, buttonElement) => {
+  if (hasInvalidInput(inputList)) {
+    buttonElement.disabled = true;
+    buttonElement.classList.add("popup__button_inactive");
+  } else {
+    buttonElement.disabled = false;
+    buttonElement.classList.remove("popup__button_inactive");
+  }
+};
+
+//устанавливаем слушатели на все инпуты формы
+const setEventListeners = (formElement) => {
+  const inputList = Array.from(formElement.querySelectorAll(".popup__input"));
+  const buttonElement = formElement.querySelector(".popup__button");
+  toggleButtonState(inputList, buttonElement);
+  inputList.forEach((inputElement) => {
+    inputElement.addEventListener("input", () => {
+      isValid(formElement, inputElement);
+      toggleButtonState(inputList, buttonElement);
+    });
+  });
+};
+
+//отслеживаем сразу все формы на странице, чтобы на инпуты каждой из них повесить слушатели
+const enableValidation = () => {
+  const formList = Array.from(document.querySelectorAll(".popup__form"));
+  formList.forEach((formElement) => {
+    setEventListeners(formElement);
+  });
+};
+
+enableValidation();

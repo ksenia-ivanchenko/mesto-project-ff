@@ -39,7 +39,6 @@
         <p class="footer__copyright">© 2021 Mesto Russia</p>
       </footer>
 
-
       <div class="popup popup_type_edit">
         <div class="popup__content">
           <button type="button" class="popup__close"></button>
@@ -48,10 +47,14 @@
             <input
               type="text"
               name="name"
+              minlength="2"
+              minlength="40"
+              pattern="[^-\sa-zA-Z]"
               class="popup__input popup__input_type_name"
               placeholder="Имя"
               required
             />
+            <span class="popup__input-type-error name-error"></span>
             <input
               type="text"
               name="description"
@@ -59,6 +62,7 @@
               placeholder="Занятие"
               required
             />
+            <span class="popup__input-type-error description-error"></span>
             <button type="submit" class="button popup__button">
               Сохранить
             </button>
@@ -66,13 +70,11 @@
         </div>
       </div>
 
-
-
       <div class="popup popup_type_new-card">
         <div class="popup__content">
           <button type="button" class="popup__close"></button>
           <h3 class="popup__title">Новое место</h3>
-          <form class="popup__form" name="newPlace">
+          <form class="popup__form" name="newPlace" novalidate>
             <input
               type="text"
               name="place-name"
@@ -80,6 +82,7 @@
               placeholder="Название"
               required
             />
+            <span class="popup__input-type-error place-name-error"></span>
             <input
               type="url"
               name="link"
@@ -87,6 +90,7 @@
               placeholder="Ссылка на картинку"
               required
             />
+            <span class="popup__input-type-error link-error"></span>
             <button type="submit" class="button popup__button">
               Сохранить
             </button>
@@ -94,8 +98,6 @@
         </div>
       </div>
 
-
-      
       <div class="popup popup_type_image">
         <div class="popup__content popup__content_content_image">
           <button type="button" class="popup__close"></button>
