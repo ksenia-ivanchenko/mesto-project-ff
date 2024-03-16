@@ -6,6 +6,8 @@ import {
   closePopup,
   closePopupWithMouse,
 } from "../scripts/modal.js";
+import { enableValidation, clearValidation } from "../scripts/validation.js";
+
 
 const placesList = document.querySelector(".places__list");
 
@@ -116,81 +118,13 @@ function addNewCard(evt) {
 popupTypeCard.addEventListener("submit", addNewCard);
 
 // валидация форм
-// показываем текст ошибки, подсвечиваем поле, если все не ок
-const showInputError = (formElement, inputElement, errorMessage) => {
-  const errorElement = formElement.querySelector(`.${inputElement.name}-error`);
-  inputElement.classList.add("popup__input-error");
-  errorElement.textContent = errorMessage;
-  errorElement.classList.add("popup__input-type-error_active");
-};
-
-//убираем текст ошибки и подсветку поля, если все ок
-const hideInputError = (formElement, inputElement) => {
-  const errorElement = formElement.querySelector(`.${inputElement.name}-error`);
-  inputElement.classList.remove("popup__input-error");
-  errorElement.classList.remove("popup__input-type-error_active");
-  errorElement.textContent = "";
-};
-
-//проверяем правильность заполнения
-const isValid = (formElement, inputElement) => {
-  if (inputElement.validity.patternMismatch) {
-    inputElement.setCustomValidity(inputElement.dataset.errorMessage);
-  } else {
-    inputElement.setCustomValidity("");
-  }
-
-  if (!inputElement.validity.valid) {
-    showInputError(formElement, inputElement, inputElement.validationMessage);
-  } else {
-    hideInputError(formElement, inputElement);
-  }
-};
-
-//проверяем, есть ли невалидные инпуты, чтобы заблочить сабмит
-const hasInvalidInput = (inputList) => {
-  return inputList.some((inputElement) => {
-    return !inputElement.validity.valid;
-  });
-};
-
-//функция включающая или отключающая сабмит
-const toggleButtonState = (inputList, buttonElement) => {
-  if (hasInvalidInput(inputList)) {
-    buttonElement.disabled = true;
-    buttonElement.classList.add("popup__button_inactive");
-  } else {
-    buttonElement.disabled = false;
-    buttonElement.classList.remove("popup__button_inactive");
-  }
-};
-
-//устанавливаем слушатели на все инпуты формы
-const setEventListeners = (formElement) => {
-  const inputList = Array.from(formElement.querySelectorAll(".popup__input"));
-  const buttonElement = formElement.querySelector(".popup__button");
-  toggleButtonState(inputList, buttonElement);
-  inputList.forEach((inputElement) => {
-    inputElement.addEventListener("input", () => {
-      isValid(formElement, inputElement);
-      toggleButtonState(inputList, buttonElement);
-    });
-  });
-};
-
-//отслеживаем сразу все формы на странице, чтобы на инпуты каждой из них повесить слушатели
-const enableValidation = (obj) => {
-  const formList = Array.from(document.querySelectorAll(".popup__form"));
-  formList.forEach((formElement) => {
-    setEventListeners(formElement);
-  });
-};
-
-enableValidation({
+const validationConfig = {
   formSelector: ".popup__form",
   inputSelector: ".popup__input",
   submitButtonSelector: ".popup__button",
-  inactiveButtonClass: "popup__button_disabled",
-  inputErrorClass: "popup__input_type_error",
-  errorClass: "popup__error_visible",
-});
+  inactiveButtonClass: "popup__button_inactive",
+  inputErrorClass: "popup__input-error",
+  errorClass: "popup__input-type-error_active",
+};
+
+enableValidation(validationConfig);
