@@ -8,7 +8,6 @@ import {
 } from "../scripts/modal.js";
 import { enableValidation, clearValidation } from "../scripts/validation.js";
 
-
 const placesList = document.querySelector(".places__list");
 
 const buttonOpenFormEditProfile = document.querySelector(
@@ -61,6 +60,7 @@ initialCards.forEach((cardData) => {
 
 // открытие модалок для редактирования профиля и добавления карточки
 buttonOpenFormEditProfile.addEventListener("click", () => {
+  clearValidation(popupTypeEdit, validationConfig);
   showPopup(popupTypeEdit);
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
@@ -105,14 +105,10 @@ function addNewCard(evt) {
   placesList.prepend(
     createCard(cardData, deleteCard, showPopupTypeImage, likeCard)
   );
+  clearValidation(forms.newPlace, validationConfig);
   forms.newPlace.reset();
   closePopup(popupTypeCard);
-
-  const inputList = Array.from(
-    forms.newPlace.querySelectorAll(".popup__input")
-  );
-  const buttonElement = forms.newPlace.querySelector(".popup__button");
-  toggleButtonState(inputList, buttonElement);
+  clearValidation(forms.newPlace, validationConfig);
 }
 
 popupTypeCard.addEventListener("submit", addNewCard);

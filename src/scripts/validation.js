@@ -90,5 +90,19 @@ const enableValidation = (validationConfigObject) => {
   });
 };
 
-const clearValidation = (profileForm, validationConfigObject) => {
+const clearValidation = (form, validationConfigObject) => {
+  const inputList = Array.from(
+    form.querySelectorAll(validationConfigObject.inputSelector)
+  );
+  const buttonElement = form.querySelector(
+    validationConfigObject.submitButtonSelector
+  );
+
+  inputList.forEach((inputElement) => {
+    hideInputError(form, inputElement, validationConfigObject);
+  });
+  console.log("клиар валидейшн");
+
+  buttonElement.disabled = true;
+  buttonElement.classList.add(validationConfigObject.inactiveButtonClass);
 };
