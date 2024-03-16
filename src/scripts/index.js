@@ -27,7 +27,6 @@ const nameInput = formEditProfile.querySelector(".popup__input_type_name");
 const jobInput = formEditProfile.querySelector(
   ".popup__input_type_description"
 );
-const nameError = formEditProfile.querySelector(`.${nameInput.name}-error`);
 
 const cardName = popupTypeCard.querySelector(".popup__input_type_card-name");
 const cardUrl = popupTypeCard.querySelector(".popup__input_type_url");
@@ -106,6 +105,12 @@ function addNewCard(evt) {
   );
   forms.newPlace.reset();
   closePopup(popupTypeCard);
+
+  const inputList = Array.from(
+    forms.newPlace.querySelectorAll(".popup__input")
+  );
+  const buttonElement = forms.newPlace.querySelector(".popup__button");
+  toggleButtonState(inputList, buttonElement);
 }
 
 popupTypeCard.addEventListener("submit", addNewCard);
@@ -130,7 +135,7 @@ const hideInputError = (formElement, inputElement) => {
 //проверяем правильность заполнения
 const isValid = (formElement, inputElement) => {
   if (inputElement.validity.patternMismatch) {
-    inputElement.setCustomValidity("Поле может содержать только латинские и кириллические буквы, знаки дефиса и пробелы");
+    inputElement.setCustomValidity(inputElement.dataset.errorMessage);
   } else {
     inputElement.setCustomValidity("");
   }
@@ -174,11 +179,18 @@ const setEventListeners = (formElement) => {
 };
 
 //отслеживаем сразу все формы на странице, чтобы на инпуты каждой из них повесить слушатели
-const enableValidation = () => {
+const enableValidation = (obj) => {
   const formList = Array.from(document.querySelectorAll(".popup__form"));
   formList.forEach((formElement) => {
     setEventListeners(formElement);
   });
 };
 
-enableValidation();
+enableValidation({
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+});

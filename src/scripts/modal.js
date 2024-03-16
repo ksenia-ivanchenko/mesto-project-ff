@@ -26,4 +26,21 @@ function closePopupWithEsc(evt) {
 function closePopup(popup) {
   popup.classList.remove("popup_is-opened");
   document.removeEventListener("keydown", closePopupWithEsc);
+
+  //убираем сообщения об ошибках
+  const activeInputElements = Array.from(
+    popup.querySelectorAll(".popup__input-error")
+  );
+  const activeFormElement = popup.querySelector(".popup__form");
+  activeInputElements.forEach((activeInputElement) => {
+    hideInputError(activeFormElement, activeInputElement);
+  });
 }
+
+// TODO: убрать дублирование кода (в индексе уже есть эта функция)
+const hideInputError = (formElement, inputElement) => {
+  const errorElement = formElement.querySelector(`.${inputElement.name}-error`);
+  inputElement.classList.remove("popup__input-error");
+  errorElement.classList.remove("popup__input-type-error_active");
+  errorElement.textContent = "";
+};

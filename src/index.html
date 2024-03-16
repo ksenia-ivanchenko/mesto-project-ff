@@ -48,8 +48,9 @@
               type="text"
               name="name"
               minlength="2"
-              minlength="40"
-              pattern="[^-\sa-zA-Z]"
+              maxlength="40"
+              pattern="^(?!\s*$)[a-zA-Zа-яёА-ЯЁ\s\-]+$"
+              data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               class="popup__input popup__input_type_name"
               placeholder="Имя"
               required
@@ -58,6 +59,10 @@
             <input
               type="text"
               name="description"
+              minlength="2"
+              maxlength="200"
+              pattern="^(?!\s*$)[a-zA-Zа-яёА-ЯЁ\s\-]+$"
+              data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               class="popup__input popup__input_type_description"
               placeholder="Занятие"
               required
@@ -78,6 +83,10 @@
             <input
               type="text"
               name="place-name"
+              minlength="2"
+              maxlength="30"
+              pattern="^(?!\s*$)[a-zA-Zа-яёА-ЯЁ\s\-]+$"
+              data-error-message="Пожалуйста, используйте только латинские и кириллические буквы, знаки дефиса и пробелы. Также поле не может содержать только пробелы."
               class="popup__input popup__input_type_card-name"
               placeholder="Название"
               required
