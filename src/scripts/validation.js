@@ -48,6 +48,12 @@ const hasInvalidInput = (inputList) => {
   });
 };
 
+// функция отключающая кнопку
+const disableSubmitButton = (button, config) => {
+  button.disabled = true;
+  button.classList.add(config.inactiveButtonClass);
+};
+
 //функция включающая или отключающая сабмит
 const toggleButtonState = (
   inputList,
@@ -55,8 +61,7 @@ const toggleButtonState = (
   validationConfigObject
 ) => {
   if (hasInvalidInput(inputList)) {
-    buttonElement.disabled = true;
-    buttonElement.classList.add(validationConfigObject.inactiveButtonClass);
+    disableSubmitButton(buttonElement, validationConfigObject);
   } else {
     buttonElement.disabled = false;
     buttonElement.classList.remove(validationConfigObject.inactiveButtonClass);
@@ -101,7 +106,6 @@ const clearValidation = (form, validationConfigObject) => {
   inputList.forEach((inputElement) => {
     hideInputError(form, inputElement, validationConfigObject);
   });
-
-  buttonElement.disabled = true;
-  buttonElement.classList.add(validationConfigObject.inactiveButtonClass);
+  
+  disableSubmitButton(buttonElement, validationConfigObject);
 };

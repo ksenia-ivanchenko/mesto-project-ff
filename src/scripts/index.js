@@ -12,6 +12,7 @@ import {
   changeAvatarPromise,
   addNewCardPromise,
   editProfilePromise,
+  deleteCardPromise,
 } from "../scripts/api.js";
 
 const placesList = document.querySelector(".places__list");
@@ -25,6 +26,7 @@ const popups = document.querySelectorAll(".popup");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
+const popupTypeDelete = document.querySelector(".popup_type_delete");
 const popupTypeAvatar = document.querySelector(".popup_type_avatar");
 const popupCloseButtons = document.querySelectorAll(".popup__close");
 const popupImage = document.querySelector(".popup__image");
@@ -61,7 +63,7 @@ for (const popup of popups) {
 
 // функция отрисовки попапа для картинок
 function showPopupTypeImage(cardData) {
-  showPopup(popupTypeImage, "Сохранить");
+  showPopup(popupTypeImage);
 
   popupImage.src = cardData.link;
   popupImage.alt = cardData.name;
@@ -71,13 +73,13 @@ function showPopupTypeImage(cardData) {
 // открытие модалок для редактирования профиля и добавления карточки
 buttonOpenFormEditProfile.addEventListener("click", () => {
   clearValidation(popupTypeEdit, validationConfig);
-  showPopup(popupTypeEdit, "Сохранить");
+  showPopup(popupTypeEdit);
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
 });
 
 addNewCardButton.addEventListener("click", () => {
-  showPopup(popupTypeCard, "Сохранить");
+  showPopup(popupTypeCard);
 });
 
 // закрытие попапа кликом по оверлею
@@ -99,37 +101,72 @@ popupCloseButtons.forEach((button) => {
 function submitEditProfileForm(evt) {
   evt.preventDefault();
   const submitButton = popupTypeEdit.querySelector(".popup__button");
-  renderLoading(true, submitButton, "Сохранение...");
-  editProfilePromise(nameInput, jobInput)
+  renderLoading(true, submitButton, "Сохранение...", "Сохранить");
+  editProfilePromise(nameInput.value, jobInput.value)
     .then(() => {
-      renderLoading(false, submitButton, "Сохранение...");
+      renderLoading(false, submitButton, "Сохранение...", "Сохранить");
       profileTitle.textContent = nameInput.value;
       profileDescription.textContent = jobInput.value;
     })
     .finally(() => {
       closePopup(popupTypeEdit);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос не выполнен: ", err);
     });
 }
 
 formEditProfile.addEventListener("submit", submitEditProfileForm);
 
+// удаление карточки
+let cardToDeleteId;
+let cardToDelete;
+function deleteCard(element, cardId) {
+  cardToDeleteId = cardId;
+  cardToDelete = element;
+
+  console.log()
+  showPopup(popupTypeDelete);
+}
+
+popupTypeDelete.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+  deleteCard(cardToDelete, cardToDeleteId);
+  const submitButton = popupTypeDelete.querySelector(".popup__button");
+  renderLoading(true, submitButton, "Удаляем...", "Да");
+  deleteCardPromise(cardToDeleteId)
+    .then(() => {
+      renderLoading(false, submitButton, "Удаляем...", "Да");
+      cardToDelete.remove();
+    })
+    .finally(() => {
+      closePopup(popupTypeDelete);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос не выполнен: ", err);
+    });
+});
+
 // добавление новой карточки пользователем
 function addNewCard(evt) {
   evt.preventDefault();
   const submitButton = popupTypeCard.querySelector(".popup__button");
-  renderLoading(true, submitButton, "Сохранение...");
-  addNewCardPromise(cardName, cardUrl)
+  renderLoading(true, submitButton, "Сохранение...", "Сохранить");
+  addNewCardPromise(cardName.value, cardUrl.value)
     .then((data) => {
-      renderLoading(false, submitButton, "Сохранение...");
+      renderLoading(false, submitButton, "Сохранение...", "Сохранить");
       const userId = data.owner._id;
       placesList.prepend(
-        createCard(data, userId, showPopupTypeImage, likeCard)
+        createCard(data, userId, showPopupTypeImage, deleteCard, likeCard)
       );
     })
     .finally(() => {
       forms.newPlace.reset();
       closePopup(popupTypeCard);
       clearValidation(forms.newPlace, validationConfig);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос не выполнен: ", err);
     });
 }
 
@@ -140,38 +177,45 @@ enableValidation(validationConfig);
 
 // интеграция с апи
 // отрисовываем всю страницу (карточки и информацию о профиле)
-allDataPromise().then(([profileData, cardsData]) => {
-  const userId = profileData._id;
-  profileTitle.textContent = profileData.name;
-  profileDescription.textContent = profileData.about;
-  profileImage.style.backgroundImage = `url(${profileData.avatar})`;
+allDataPromise()
+  .then(([profileData, cardsData]) => {
+    const userId = profileData._id;
+    profileTitle.textContent = profileData.name;
+    profileDescription.textContent = profileData.about;
+    profileImage.style.backgroundImage = `url(${profileData.avatar})`;
 
-  cardsData.forEach((cardData) => {
-    placesList.append(
-      createCard(cardData, userId, showPopupTypeImage, likeCard)
-    );
+    cardsData.forEach((cardData) => {
+      placesList.append(
+        createCard(cardData, userId, showPopupTypeImage, deleteCard, likeCard)
+      );
+    });
+  })
+  .catch((err) => {
+    console.log("Ошибка. Запрос не выполнен: ", err);
   });
-});
 
 // функция изменения аватарки
 function changeAvatar(evt) {
   evt.preventDefault();
   const submitButton = popupTypeAvatar.querySelector(".popup__button");
-  renderLoading(true, submitButton, "Сохранение...");
-  changeAvatarPromise(avatarInput)
+  renderLoading(true, submitButton, "Сохранение...", "Сохранить");
+  changeAvatarPromise(avatarInput.value)
     .then(() => {
-      renderLoading(false, submitButton, "Сохранение...");
+      renderLoading(false, submitButton, "Сохранение...", "Сохранить");
       profileImage.style.backgroundImage = `url(${avatarInput.value})`;
     })
     .finally(() => {
       forms.avatar.reset();
       closePopup(popupTypeAvatar);
       clearValidation(forms.avatar, validationConfig);
+    })
+    .catch((err) => {
+      console.log("Ошибка. Запрос не выполнен: ", err);
     });
 }
 
 //слушатели на изменение аватарки
 profileImage.addEventListener("click", () => {
-  showPopup(popupTypeAvatar, "Сохранить");
+  showPopup(popupTypeAvatar);
 });
 popupTypeAvatar.addEventListener("submit", changeAvatar);

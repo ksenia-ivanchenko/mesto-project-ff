@@ -1,10 +1,7 @@
 export { showPopup, closePopup, closePopupWithMouse, renderLoading };
 
 // функция появления модального окна
-function showPopup(popupType, submitButtonText) {
-  const submitButton = popupType.querySelector(".popup__button");
-
-  submitButton.textContent = submitButtonText;
+function showPopup(popupType) {
   popupType.classList.add("popup_is-opened");
   document.addEventListener("keydown", closePopupWithEsc);
 }
@@ -32,10 +29,6 @@ function closePopup(popup) {
 }
 
 // функция отрисовки статуса загрузки для пользователя
-function renderLoading(isLoading, button, buttonText) {
-  if (isLoading) {
-    button.textContent = buttonText;
-  } else {
-    button.textContent = "Готово!";
-  }
+function renderLoading(isLoading, button, loadingButtonText, submitButtonText) {
+  button.textContent = isLoading ? loadingButtonText : submitButtonText;
 }
