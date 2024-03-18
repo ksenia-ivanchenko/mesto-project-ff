@@ -1,5 +1,10 @@
 export { createCard, likeCard };
 import { closePopup, showPopup } from "../scripts/modal.js";
+import {
+  deleteCardPromise,
+  unlikeCardPromise,
+  likeCardPromise,
+} from "../scripts/api.js";
 
 const cardTemplate = document.querySelector("#card-template").content;
 const popupTypeDelete = document.querySelector(".popup_type_delete");
@@ -9,61 +14,22 @@ function deleteCard(element, cardData) {
   popupTypeDelete.addEventListener("submit", (evt) => {
     evt.preventDefault();
     element.remove();
-    fetch(
-      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/${cardData._id}`,
-      {
-        method: "DELETE",
-        headers: {
-          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    deleteCardPromise(cardData);
     closePopup(popupTypeDelete);
   });
 }
 
 function likeCard(button, cardData, likesNumber) {
   if (button.classList.contains("card__like-button_is-active")) {
-    console.log("лайк удаляем");
-    fetch(
-      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/likes/${cardData._id}`,
-      {
-        method: "DELETE",
-        headers: {
-          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          likes: cardData.likes.filter((userId) => userId !== cardData._id),
-        }),
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        likesNumber.textContent = data.likes.length;
-        button.classList.remove("card__like-button_is-active");
-      });
+    unlikeCardPromise(cardData).then((data) => {
+      likesNumber.textContent = data.likes.length;
+      button.classList.remove("card__like-button_is-active");
+    });
   } else {
-    console.log("лайк ставим");
-    fetch(
-      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/likes/${cardData._id}`,
-      {
-        method: "PUT",
-        headers: {
-          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          likes: cardData.likes.push(cardData._id),
-        }),
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        likesNumber.textContent = data.likes.length;
-        button.classList.add("card__like-button_is-active");
-      });
+    likeCardPromise(cardData).then((data) => {
+      likesNumber.textContent = data.likes.length;
+      button.classList.add("card__like-button_is-active");
+    });
   }
 }
 

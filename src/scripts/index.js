@@ -6,6 +6,12 @@ import {
   closePopupWithMouse,
 } from "../scripts/modal.js";
 import { enableValidation, clearValidation } from "../scripts/validation.js";
+import {
+  allDataPromise,
+  changeAvatarPromise,
+  addNewCardPromise,
+  editProfilePromise,
+} from "../scripts/api.js";
 
 const placesList = document.querySelector(".places__list");
 
@@ -23,15 +29,15 @@ const popupCloseButtons = document.querySelectorAll(".popup__close");
 const popupImage = document.querySelector(".popup__image");
 const popupCaption = document.querySelector(".popup__caption");
 
+const cardName = popupTypeCard.querySelector(".popup__input_type_card-name");
+const cardUrl = popupTypeCard.querySelector(".popup__input_type_url");
+
 const formEditProfile = popupTypeEdit.querySelector(".popup__form");
 const nameInput = formEditProfile.querySelector(".popup__input_type_name");
 const jobInput = formEditProfile.querySelector(
   ".popup__input_type_description"
 );
 const avatarInput = popupTypeAvatar.querySelector(".popup__input_type_avatar");
-
-const cardName = popupTypeCard.querySelector(".popup__input_type_card-name");
-const cardUrl = popupTypeCard.querySelector(".popup__input_type_url");
 
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
@@ -93,18 +99,7 @@ function submitEditProfileForm(evt) {
   evt.preventDefault();
   const submitButton = popupTypeEdit.querySelector(".popup__button");
   renderLoading(true, submitButton);
-  fetch("https://mesto.nomoreparties.co/v1/wff-cohort-8/users/me", {
-    method: "PATCH",
-    headers: {
-      authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: nameInput.value,
-      about: jobInput.value,
-    }),
-  })
-    .then((res) => res.json())
+  editProfilePromise(nameInput, jobInput)
     .then(() => {
       profileTitle.textContent = nameInput.value;
       profileDescription.textContent = jobInput.value;
@@ -122,18 +117,7 @@ function addNewCard(evt) {
   evt.preventDefault();
   const submitButton = popupTypeCard.querySelector(".popup__button");
   renderLoading(true, submitButton);
-  fetch("https://mesto.nomoreparties.co/v1/wff-cohort-8/cards", {
-    method: "POST",
-    headers: {
-      authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: cardName.value,
-      link: cardUrl.value,
-    }),
-  })
-    .then((res) => res.json())
+  addNewCardPromise(cardName, cardUrl)
     .then((data) => {
       const userId = data.owner._id;
       placesList.prepend(
@@ -154,65 +138,26 @@ popupTypeCard.addEventListener("submit", addNewCard);
 enableValidation(validationConfig);
 
 // интеграция с апи
+// отрисовываем всю страницу (карточки и информацию о профиле)
+allDataPromise().then(([profileData, cardsData]) => {
+  const userId = profileData._id;
+  profileTitle.textContent = profileData.name;
+  profileDescription.textContent = profileData.about;
+  profileImage.style.backgroundImage = `url(${profileData.avatar})`;
 
-// информация о пользователе
-const fetchProfileData = fetch(
-  "https://mesto.nomoreparties.co/v1/wff-cohort-8/users/me",
-  {
-    headers: {
-      authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-    },
-  }
-)
-  .then((res) => res.json())
-  .catch((err) => {
-    console.log("Ошибка. Запрос не выполнен: ", err);
+  cardsData.forEach((cardData) => {
+    placesList.append(
+      createCard(cardData, userId, showPopupTypeImage, likeCard)
+    );
   });
+});
 
-// карточки
-const fetchCardsData = fetch(
-  "https://mesto.nomoreparties.co/v1/wff-cohort-8/cards",
-  {
-    headers: {
-      authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-    },
-  }
-)
-  .then((res) => res.json())
-  .catch((err) => {
-    console.log("Ошибка. Запрос не выполнен: ", err);
-  });
-
-Promise.all([fetchProfileData, fetchCardsData]).then(
-  ([profileData, cardsData]) => {
-    const userId = profileData._id;
-    profileTitle.textContent = profileData.name;
-    profileDescription.textContent = profileData.about;
-    profileImage.style.backgroundImage = `url(${profileData.avatar})`;
-
-    cardsData.forEach((cardData) => {
-      placesList.append(
-        createCard(cardData, userId, showPopupTypeImage, likeCard)
-      );
-    });
-  }
-);
-
+// функция изменения аватарки
 function changeAvatar(evt) {
   evt.preventDefault();
   const submitButton = popupTypeAvatar.querySelector(".popup__button");
   renderLoading(true, submitButton);
-  fetch("https://mesto.nomoreparties.co/v1/wff-cohort-8/users/me/avatar", {
-    method: "PATCH",
-    headers: {
-      authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      avatar: avatarInput.value,
-    }),
-  })
-    .then((res) => res.json())
+  changeAvatarPromise(avatarInput)
     .then(() => {
       profileImage.style.backgroundImage = `url(${avatarInput.value})`;
     })
@@ -224,12 +169,13 @@ function changeAvatar(evt) {
     });
 }
 
+//слушатели на изменение аватарки
 profileImage.addEventListener("click", () => {
   showPopup(popupTypeAvatar);
 });
-
 popupTypeAvatar.addEventListener("submit", changeAvatar);
 
+// функция отрисовки статуса загрузки для пользователя
 function renderLoading(isLoading, button) {
   if (isLoading) {
     button.textContent = "Сохранение...";
