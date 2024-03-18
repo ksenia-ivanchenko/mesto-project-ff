@@ -101,7 +101,6 @@ const clearValidation = (form, validationConfigObject) => {
   inputList.forEach((inputElement) => {
     hideInputError(form, inputElement, validationConfigObject);
   });
-  console.log("клиар валидейшн");
 
   buttonElement.disabled = true;
   buttonElement.classList.add(validationConfigObject.inactiveButtonClass);

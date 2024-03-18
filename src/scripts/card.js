@@ -1,32 +1,100 @@
-export { createCard, deleteCard, likeCard };
+export { createCard, likeCard };
+import { closePopup, showPopup } from "../scripts/modal.js";
 
 const cardTemplate = document.querySelector("#card-template").content;
+const popupTypeDelete = document.querySelector(".popup_type_delete");
 
-function deleteCard(element) {
-  element.remove();
+function deleteCard(element, cardData) {
+  showPopup(popupTypeDelete);
+  popupTypeDelete.addEventListener("submit", (evt) => {
+    evt.preventDefault();
+    element.remove();
+    fetch(
+      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/${cardData._id}`,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    closePopup(popupTypeDelete);
+  });
 }
 
-function likeCard(button) {
-  button.classList.toggle("card__like-button_is-active");
+function likeCard(button, cardData, likesNumber) {
+  if (button.classList.contains("card__like-button_is-active")) {
+    console.log("лайк удаляем");
+    fetch(
+      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/likes/${cardData._id}`,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          likes: cardData.likes.filter((userId) => userId !== cardData._id),
+        }),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        likesNumber.textContent = data.likes.length;
+        button.classList.remove("card__like-button_is-active");
+      });
+  } else {
+    console.log("лайк ставим");
+    fetch(
+      `https://mesto.nomoreparties.co/v1/wff-cohort-8/cards/likes/${cardData._id}`,
+      {
+        method: "PUT",
+        headers: {
+          authorization: "278e847c-44dd-45b9-a59c-b2a0939f7aef",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          likes: cardData.likes.push(cardData._id),
+        }),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        likesNumber.textContent = data.likes.length;
+        button.classList.add("card__like-button_is-active");
+      });
+  }
 }
 
-function createCard(cardData, deleteCard, showPopupTypeImage, likeCard) {
+function createCard(cardData, userId, showPopupTypeImage, likeCard) {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const deleteButton = cardElement.querySelector(".card__delete-button");
   const cardImage = cardElement.querySelector(".card__image");
   const likeButton = cardElement.querySelector(".card__like-button");
   const cardTitle = cardElement.querySelector(".card__title");
+  const likesNumber = cardElement.querySelector(".card__likes-number");
 
   cardImage.src = cardData.link;
   cardImage.alt = cardData.name;
   cardTitle.textContent = cardData.name;
+  likesNumber.textContent = cardData.likes.length;
+
+  //удаляем кнопку корзины если карточка чужая
+  if (cardData.owner._id !== userId) {
+    deleteButton.remove();
+  }
   // по жматию на кнопку удаления, вызываем функцию удаления карточки
   deleteButton.addEventListener("click", () => {
-    deleteCard(cardElement);
+    deleteCard(cardElement, cardData);
   });
+  // делаем сердеко черным при загрузке страницы если ранее был поставлен лайк
+  if (cardData.likes.some((user) => user._id === userId)) {
+    likeButton.classList.add("card__like-button_is-active");
+  }
   // обработчик лайка
   likeButton.addEventListener("click", () => {
-    likeCard(likeButton);
+    likeCard(likeButton, cardData, likesNumber);
   });
   // открываем и заполняем попап при жматии на картинку
   cardImage.addEventListener("click", () => {
