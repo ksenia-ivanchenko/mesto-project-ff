@@ -1,5 +1,5 @@
 export { createCard, likeCard };
-import { closePopup, showPopup } from "../scripts/modal.js";
+import { closePopup, showPopup, renderLoading } from "../scripts/modal.js";
 import {
   deleteCardPromise,
   unlikeCardPromise,
@@ -10,12 +10,19 @@ const cardTemplate = document.querySelector("#card-template").content;
 const popupTypeDelete = document.querySelector(".popup_type_delete");
 
 function deleteCard(element, cardData) {
-  showPopup(popupTypeDelete);
+  showPopup(popupTypeDelete, "Да");
   popupTypeDelete.addEventListener("submit", (evt) => {
     evt.preventDefault();
-    element.remove();
-    deleteCardPromise(cardData);
-    closePopup(popupTypeDelete);
+    const submitButton = popupTypeDelete.querySelector(".popup__button");
+    renderLoading(true, submitButton, "Удаляем...");
+    deleteCardPromise(cardData)
+      .then(() => {
+        renderLoading(false, submitButton, "Удаляем...");
+        element.remove();
+      })
+      .finally(() => {
+        closePopup(popupTypeDelete);
+      });
   });
 }
 

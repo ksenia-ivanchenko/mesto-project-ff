@@ -1,7 +1,10 @@
-export { showPopup, closePopup, closePopupWithMouse };
+export { showPopup, closePopup, closePopupWithMouse, renderLoading };
 
 // функция появления модального окна
-function showPopup(popupType) {
+function showPopup(popupType, submitButtonText) {
+  const submitButton = popupType.querySelector(".popup__button");
+
+  submitButton.textContent = submitButtonText;
   popupType.classList.add("popup_is-opened");
   document.addEventListener("keydown", closePopupWithEsc);
 }
@@ -26,4 +29,13 @@ function closePopupWithEsc(evt) {
 function closePopup(popup) {
   popup.classList.remove("popup_is-opened");
   document.removeEventListener("keydown", closePopupWithEsc);
+}
+
+// функция отрисовки статуса загрузки для пользователя
+function renderLoading(isLoading, button, buttonText) {
+  if (isLoading) {
+    button.textContent = buttonText;
+  } else {
+    button.textContent = "Готово!";
+  }
 }
